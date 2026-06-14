@@ -1,0 +1,13 @@
+import self as wx
+import json
+import value
+effect fn main() -> Unit = {
+  println(json.stringify(value.object([
+    ("c0", value.str(wx.label(0))),
+    ("c63", value.str(wx.label(63))),
+    ("c95", value.str(wx.label(95))),
+    ("unknown", value.str(wx.label(7))),
+    ("q1", value.bool(wx.is_weather_query("東京の天気は？"))),
+    ("q2", value.bool(wx.is_weather_query("こんにちは"))),
+  ])))
+}

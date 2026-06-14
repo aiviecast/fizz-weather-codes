@@ -1,0 +1,32 @@
+// fizz_weather_codes — WMO 天気コード→日本語ラベル + 天気クエリ検出(§10 weather-tool)。
+//
+// 責務 (一行): Open-Meteo の WMO weather code を配信読み上げ用の自然な日本語ラベルに
+// 変換し、視聴者コメントが天気を尋ねているか判定する。
+//
+// Open-Meteo の HTTP 取得・geocoding は Node の I/O、コード→ラベルの対応表と
+// キーワード判定は純粋なので Almide に集約=単一の正本。
+// 移植元: openaituber src/chat/weatherTool.ts (WMO_LABELS / WEATHER_KEYWORD)。
+
+import string
+
+// WMO weather code → 日本語ラベル(TTS で違和感の出ない自然語)。未知コードは ""。
+fn label(code: Int) -> String = match code {
+  0 => "快晴", 1 => "晴れ", 2 => "薄曇り", 3 => "曇り",
+  45 => "霧", 48 => "着氷性の霧",
+  51 => "弱い霧雨", 53 => "霧雨", 55 => "強い霧雨",
+  56 => "弱い着氷性の霧雨", 57 => "着氷性の霧雨",
+  61 => "弱い雨", 63 => "雨", 65 => "強い雨",
+  66 => "弱い着氷性の雨", 67 => "着氷性の雨",
+  71 => "弱い雪", 73 => "雪", 75 => "大雪", 77 => "霧雪",
+  80 => "弱いにわか雨", 81 => "にわか雨", 82 => "激しいにわか雨",
+  85 => "弱いにわか雪", 86 => "強いにわか雪",
+  95 => "雷雨", 96 => "ひょうを伴う弱い雷雨", 99 => "ひょうを伴う激しい雷雨",
+  _ => "",
+}
+
+// 既知の WMO コードか。
+fn is_known(code: Int) -> Bool = label(code) != ""
+
+// コメントが天気を尋ねているか(天気/気温/温度 のいずれかを含む)。
+fn is_weather_query(text: String) -> Bool =
+  string.contains(text, "天気") or string.contains(text, "気温") or string.contains(text, "温度")

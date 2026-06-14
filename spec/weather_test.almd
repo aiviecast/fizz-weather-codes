@@ -1,0 +1,22 @@
+import self as wx
+test "WMO code labels" {
+  assert_eq(wx.label(0), "快晴")
+  assert_eq(wx.label(3), "曇り")
+  assert_eq(wx.label(63), "雨")
+  assert_eq(wx.label(95), "雷雨")
+  assert_eq(wx.label(99), "ひょうを伴う激しい雷雨")
+  assert_eq(wx.label(7), "")        // unknown
+}
+test "is_known" {
+  assert_eq(wx.is_known(0), true)
+  assert_eq(wx.is_known(95), true)
+  assert_eq(wx.is_known(7), false)
+  assert_eq(wx.is_known(1000), false)
+}
+test "is_weather_query: 天気/気温/温度" {
+  assert_eq(wx.is_weather_query("東京の天気は？"), true)
+  assert_eq(wx.is_weather_query("今の気温教えて"), true)
+  assert_eq(wx.is_weather_query("温度どれくらい"), true)
+  assert_eq(wx.is_weather_query("こんにちは"), false)
+  assert_eq(wx.is_weather_query(""), false)
+}

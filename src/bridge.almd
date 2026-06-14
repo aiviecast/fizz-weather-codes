@@ -1,0 +1,45 @@
+// wasm — Node の weather-tool から呼ぶ。
+//   is_weather_query: text(buffer) → Bool(Float)
+//   label: code(Int) → ラベル文字列を出力バッファに書き長さを返す → out_ptr で読む。
+//          (label は呼ぶたびに 1 回だけ読む運用。to_string_lossy/from_string のエイリアス
+//           対策で input/output は分離。)
+import self as wx
+import bytes
+import float
+import int
+import list
+import string
+
+var g_in: Bytes = bytes.new(0)
+var g_out: Bytes = bytes.new(0)
+
+@export(wasm, "in_alloc")
+fn in_alloc(len: Float) -> RawPtr = {
+  g_in = bytes.new(float.to_int(len))
+  bytes.as_mut_ptr(g_in)
+}
+
+@export(wasm, "is_weather_query")
+fn is_weather_query() -> Float = if wx.is_weather_query(bytes.to_string_lossy(g_in)) then 1.0 else 0.0
+
+@export(wasm, "label_resolve")
+fn label_resolve(code: Float) -> Float = {
+  let s = wx.label(float.to_int(code))
+  g_out = bytes.from_string(s)
+  int.to_float(list.len(string.to_bytes(s)))
+}
+
+@export(wasm, "out_ptr")
+fn out_ptr() -> RawPtr = bytes.as_mut_ptr(g_out)
+
+@export(wasm, "is_known")
+fn is_known(code: Float) -> Float = if wx.is_known(float.to_int(code)) then 1.0 else 0.0
+
+effect fn main() -> Unit = {
+  let _a = in_alloc(1.0)
+  let _b = is_weather_query()
+  let _c = label_resolve(0.0)
+  let _d = out_ptr()
+  let _e = is_known(0.0)
+  ()
+}

@@ -1,0 +1,4 @@
+[package]
+name = "fizz_weather_codes"
+version = "0.1.0"
+description = "Fizz weather codes — WMO weather code to Japanese label (for TTS read-out) + weather-query keyword detection. One Almide core, native + wasm."
