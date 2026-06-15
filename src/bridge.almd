@@ -19,8 +19,13 @@ fn in_alloc(len: Float) -> RawPtr = {
   bytes.as_mut_ptr(g_in)
 }
 
+// g_in を一旦 from_list(to_list(...)) で独立バッファにコピーしてから文字列化する。
+// to_string_lossy は g_in をエイリアスし、終了時の String dec が g_in を free する
+// (almide#690、released 未修正)。直接渡すと「同じ入力で 2 回以上呼ぶ / label を挟む」
+// と g_in が解放済みになり trap する。コピー経由なら g_in は無傷で多重読みも安全。
 @export(wasm, "is_weather_query")
-fn is_weather_query() -> Float = if wx.is_weather_query(bytes.to_string_lossy(g_in)) then 1.0 else 0.0
+fn is_weather_query() -> Float =
+  if wx.is_weather_query(bytes.to_string_lossy(bytes.from_list(bytes.to_list(g_in)))) then 1.0 else 0.0
 
 @export(wasm, "label_resolve")
 fn label_resolve(code: Float) -> Float = {

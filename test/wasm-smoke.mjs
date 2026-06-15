@@ -13,4 +13,9 @@ ck(label(7) === "", "unknown label");
 ck(ex.is_known(63) === 1, "is_known 63");
 ck(isQuery("東京の天気は？") === 1, "weather query");
 ck(isQuery("こんにちは") === 0, "non-query");
-console.log(ok ? "wasm OK — weather labels + query detection match native" : "FAIL"); if (!ok) process.exit(1);
+// 多重読み: 1 set で is_weather_query を複数回 + label を挟んでも安全 (almide#690 回避)
+{ const b = enc.encode("今日の気温は"); const p = ex.in_alloc(b.length); new Uint8Array(ex.memory.buffer, Number(p), b.length).set(b);
+  ck(ex.is_weather_query() === 1 && ex.is_weather_query() === 1, "multi-read query");
+  ex.label_resolve(0);
+  ck(ex.is_weather_query() === 1, "query after label (g_in intact)"); }
+console.log(ok ? "wasm OK — labels + query (incl. multi-read) match native" : "FAIL"); if (!ok) process.exit(1);
